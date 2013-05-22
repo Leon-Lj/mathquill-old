@@ -25,9 +25,11 @@ var VanillaSymbol = P(Symbol, function(_, _super) {
     _super.init.call(this, ch, '<span>'+(html || ch)+'</span>');
   };
 });
-
-CharCmds[' '] = bind(VanillaSymbol, '\\:', ' ');
-
+//HACK support spaces
+//for hack: spaces will be exported as \text{ }
+//CharCmds[' '] = bind(VanillaSymbol, '\\:', ' ');
+CharCmds[' '] = bind(VanillaSymbol, '\\text{ }', ' ');
+//*-HACK support spaces-*
 LatexCmds.prime = CharCmds["'"] = bind(VanillaSymbol, "'", '&prime;');
 
 // does not use Symbola font

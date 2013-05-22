@@ -222,14 +222,9 @@ var RootMathBlock = P(MathBlock, function(_, _super) {
     // Tab or Esc -> go one block right if it exists, else escape right.
     case 'Esc':
     case 'Tab':
-    case 'Spacebar':
-      var parent = this.cursor.parent;
-      // cursor is in root editable, continue default
-      if (parent === this.cursor.root) {
-        if (key === 'Spacebar') e.preventDefault();
-        return;
-      }
-
+      //HACK: allow spaces
+      //because the spacebar key is not used to escape the math block any longer,
+      //Esc and Tab will handle that.
       this.cursor.prepareMove();
       if (parent[R]) {
         // go one block right
@@ -238,8 +233,34 @@ var RootMathBlock = P(MathBlock, function(_, _super) {
         // get out of the block
         this.cursor.insRightOf(parent.parent);
       }
+      //*-HACK: allow spaces*-
       break;
-
+    case 'Spacebar':
+      //HACK: allow spaces
+      //when 'Spacebar' key is pressed, it allows onKeyPress event bubble 
+      //to the RootMathBlock
+      // the original lines of code are comment out as below
+      
+      //var parent = this.cursor.parent;
+      // cursor is in root editable, continue default
+      // if (parent === this.cursor.root) {
+        // if (key === 'Spacebar') e.preventDefault();
+        // return;
+      // }
+      // this.cursor.prepareMove();
+      // if (parent[R]) {
+        // // go one block right
+        // this.cursor.insAtLeftEnd(parent[R]);
+      // } else {
+        // // get out of the block
+        // this.cursor.insRightOf(parent.parent);
+      // }
+      
+      // break;
+      
+      //for hack: it returns here to allow onKeyPress event bubbled
+      return;
+      //*-HACK: allow spaces*-
     // Shift-Tab -> go one block left if it exists, else escape left.
     case 'Shift-Tab':
     case 'Shift-Esc':
