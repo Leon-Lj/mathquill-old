@@ -225,6 +225,7 @@ var RootMathBlock = P(MathBlock, function(_, _super) {
       //HACK: allow spaces
       //because the spacebar key is not used to escape the math block any longer,
       //Esc and Tab will handle that.
+      var parent = this.cursor.parent;
       this.cursor.prepareMove();
       if (parent[R]) {
         // go one block right
