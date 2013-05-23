@@ -227,6 +227,10 @@ var RootMathBlock = P(MathBlock, function(_, _super) {
       //Esc and Tab will handle that.
       var parent = this.cursor.parent;
       this.cursor.prepareMove();
+      //cursor is in root editable, continue default
+      if (parent === this.cursor.root) {
+        return;
+      }
       if (parent[R]) {
         // go one block right
         this.cursor.insAtLeftEnd(parent[R]);
