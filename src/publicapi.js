@@ -64,6 +64,16 @@ jQuery.fn.mathquill = function(cmd, latex) {
           cursor = block && block.cursor;
 
         if (cursor) {
+          //HACK: No exponent/sub on empty cells
+          //Prevent using exponents and subtext on empty cells to prevent confusion.
+          //Only allow input exponents and subtext in case there is symbol had inputed before them.
+          //Also apply this hack in case input by pressing key.
+          if (latex === "^" || latex === "_") {
+            if (cursor[L] === 0) {
+                return;
+            }
+          }
+          //*-HACK: No exponent/sub on empty cells -*
           var seln = cursor.prepareWrite();
           if (/^\\[a-z]+$/i.test(latex)) cursor.insertCmd(latex.slice(1), seln);
           else cursor.insertCh(latex, seln);

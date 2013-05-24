@@ -388,7 +388,21 @@ var RootMathBlock = P(MathBlock, function(_, _super) {
       this.cursor.prepareMove().insAtRightEnd(this);
       while (this.cursor[L]) this.cursor.selectLeft();
       break;
-
+    //HACK: No exponent/sub on empty cells
+    //Prevent using exponents and subtext on empty cells to prevent confusion.
+    //Only allow input exponents and subtext in case there is symbol had inputed before them.
+    //Also apply this hack in case input by using public method 'cmd'.
+    case 'Shift-6':
+    case 'Shift-½':
+      //if leftward of cursor is nothing just prevent onKeyPress event from being bubbled. 
+      if (this.cursor[L] === 0) {
+        break;
+      } 
+      else {
+        //allow onKeyPress event to be buubled
+        return false;
+      }
+    //*-HACK: No exponent/sub on empty cells -*
     default:
       return false;
     }
