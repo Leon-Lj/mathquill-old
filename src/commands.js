@@ -444,17 +444,22 @@ LatexCmds.rbrack =
 LatexCmds.rbracket =
 CharCmds[']'] = bind(CloseParen, '[', ']');
 
-var Pipes =
-LatexCmds.lpipe =
-LatexCmds.rpipe =
-CharCmds['|'] = P(Paren, function(_, _super) {
-  _.init = function() {
-    _super.init.call(this, '|', '|');
-  };
-
-  _.createLeftOf = CloseBracket.prototype.createLeftOf;
-});
-
+//HACK modify pipe for single pipe. Do not auto add open and close pipe.
+//Just generate a simple symbol '|' for pipe. 
+//The original source code is comment out below
+//*-* start
+// var Pipes =
+// LatexCmds.lpipe =
+// LatexCmds.rpipe =
+// CharCmds['|'] = P(Paren, function(_, _super) {
+  // _.init = function() {
+    // _super.init.call(this, '|', '|');
+  // };
+// 
+  // _.createLeftOf = CloseBracket.prototype.createLeftOf;
+// });
+LatexCmds['|'] = bind(BinaryOperator,'| ','| ');
+//*-* HACK end
 var TextBlock =
 CharCmds.$ =
 LatexCmds.text =
@@ -855,7 +860,57 @@ LatexCmds.vector = P(MathCommand, function(_, _super) {
     }
   };
 });
+//HACK: add command for vector and hat
+//*-* start *-*
+var Hat =
+LatexCmds.hat =
+P(MathCommand, function(_, _super) {
+  _.ctrlSeq = '\\hat';
+  _.htmlTemplate =
+    '<sup class="diacritic-char">^</sup>'
+    + '<span class="">'
+    +   '&0'
+    + '</span>'
+  ;
+  _.textTemplate = ['(', '^', ')'];
+  _.finalizeTree = function() {
+    this.up = this.lastChild.up = this.firstChild;
+    this.down = this.firstChild.down = this.lastChild;
+  };
+});
+var Vec =
+LatexCmds.vec =
+P(MathCommand, function(_, _super) {
+  _.ctrlSeq = '\\vec';
+  _.htmlTemplate =
+    '<sup class="diacritic-char">&#8594;</sup>'
+    + '<span class="">'
+    +   '&0'
+    + '</span>'
+  ;
+  _.textTemplate = ['(', '^', ')'];
+  _.finalizeTree = function() {
+    this.up = this.lastChild.up = this.firstChild;
+    this.down = this.firstChild.down = this.lastChild;
+  };
+});
+//HACK: add command for vector and hat
+//*-* end *-*
 
+//HACK: add command mathbb. This modification make mathquill support mathbb
+//  ex: mathbb{N} --> ℕ
+//*-* start *-*
+var Mathbb =
+LatexCmds.mathbb = P(MathCommand, function(_, _super) {
+  _.ctrlSeq = '\\mathbb';
+  _.htmlTemplate = ' ';
+  _.textTemplate = ['mathbb(', ')'];
+  _.latex = function() {
+    return "";
+  };
+});
+//HACK: add command for vector and hat
+//*-* end *-*
 LatexCmds.editable = P(RootMathCommand, function(_, _super) {
   _.init = function() {
     MathCommand.prototype.init.call(this, '\\editable');

@@ -129,6 +129,11 @@ LatexCmds.Upsih = //'cos it makes sense to me
   bind(Symbol,'\\Upsilon ','<var style="font-family: serif">&upsih;</var>'); //Symbola's 'upsilon with a hook' is a capital Y without hooks :(
 
 //other symbols with the same LaTeX command and HTML character entity reference
+//*-* HACK support export Upper-Case Alpha and Upper-Case Beta 
+//*-* start
+LatexCmds.Alpha =
+LatexCmds.Beta =
+//*-* end
 LatexCmds.Gamma =
 LatexCmds.Delta =
 LatexCmds.Theta =
@@ -268,6 +273,8 @@ LatexCmds.gt = bind(BinaryOperator,'>','&gt;');
 LatexCmds['≤'] = LatexCmds.le = LatexCmds.leq = bind(BinaryOperator,'\\le ','&le;');
 
 LatexCmds['≥'] = LatexCmds.ge = LatexCmds.geq = bind(BinaryOperator,'\\ge ','&ge;');
+
+LatexCmds['|'] = bind(BinaryOperator,'| ','| ');
 
 LatexCmds.isin = LatexCmds['in'] = bind(BinaryOperator,'\\in ','&isin;');
 
@@ -583,7 +590,10 @@ var NonItalicizedFunction = P(Symbol, function(_, _super) {
       '' : 'non-italicized-function';
   };
 });
-
+//HACK support export 'e' symbol
+//*-* start
+LatexCmds.e =
+//*-* end
 LatexCmds.ln =
 LatexCmds.lg =
 LatexCmds.log =
