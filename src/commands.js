@@ -905,7 +905,7 @@ P(MathCommand, function(_, _super) {
 //*-* start *-*
 var transformMathbb = function(latex) {
   if (latex.indexOf('mathbb') != -1) {
-    return latex.replace('mathbb','').replace('\{','').replace('\}','');
+    return latex.replace('mathbb','').replace(/[mathbb-{-}]/g,'');
   }
   return latex;
 }
