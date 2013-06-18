@@ -26,6 +26,11 @@ jQuery.fn.mathquill = function(cmd, latex) {
     });
   case 'latex':
     if (arguments.length > 1) {
+      //HACK support mathbb. 
+      //TODO: It may not a good fix. Rethink of this.
+      //-*- start
+      latex = transformMathbb(latex);
+      //-*- end
       return this.each(function() {
         var blockId = $(this).attr(mqBlockId),
           block = blockId && MathElement[blockId];

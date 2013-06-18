@@ -899,17 +899,16 @@ P(MathCommand, function(_, _super) {
 
 //HACK: add command mathbb. This modification make mathquill support mathbb
 //  ex: mathbb{N} --> ℕ
+// because currently, MathQuill supports for \N,\Q,\Z,\R, so we will transfrom 'mathbb' to the 
+// existing form of \N,\Q,\Z,\R
+//TODO: it's not a good fix. Rethink of it.
 //*-* start *-*
-var Mathbb =
-LatexCmds.mathbb = P(MathCommand, function(_, _super) {
-  _.ctrlSeq = '\\mathbb';
-  _.htmlTemplate = ' ';
-  _.textTemplate = ['mathbb(', ')'];
-  _.latex = function() {
-    return "";
-  };
-});
-//HACK: add command for vector and hat
+var transformMathbb = function(latex) {
+  if (latex.indexOf('mathbb') != -1) {
+    return latex.replace('mathbb','').replace('\{','').replace('\}','');
+  }
+  return latex;
+}
 //*-* end *-*
 LatexCmds.editable = P(RootMathCommand, function(_, _super) {
   _.init = function() {
