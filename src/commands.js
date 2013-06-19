@@ -873,10 +873,6 @@ P(MathCommand, function(_, _super) {
     + '</span>'
   ;
   _.textTemplate = ['(', '^', ')'];
-  _.finalizeTree = function() {
-    this.up = this.lastChild.up = this.firstChild;
-    this.down = this.firstChild.down = this.lastChild;
-  };
 });
 var Vec =
 LatexCmds.vec =
@@ -889,10 +885,6 @@ P(MathCommand, function(_, _super) {
     + '</span>'
   ;
   _.textTemplate = ['(', '^', ')'];
-  _.finalizeTree = function() {
-    this.up = this.lastChild.up = this.firstChild;
-    this.down = this.firstChild.down = this.lastChild;
-  };
 });
 //HACK: add command for vector and hat
 //*-* end *-*
