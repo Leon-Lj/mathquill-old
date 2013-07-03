@@ -288,7 +288,23 @@ var RootMathBlock = P(MathBlock, function(_, _super) {
       break;
 
     // Prevent newlines from showing up
-    case 'Enter': break;
+    case 'Enter':
+        //HACK hook on Enter key press while typing on mathquill textbox
+        //-** start
+        if (this.jQ.mathquill.onKeyFunctions && this.jQ.mathquill.onKeyFunctions["Enter"]){
+            this.jQ.mathquill.onKeyFunctions["Enter"]();
+        }
+        //-** ends
+      break;
+
+    case 'Shift-Enter':
+        //HACK hook on Shift-Enter key press while typing on mathquill textbox
+        //-** start
+        if (this.jQ.mathquill.onKeyFunctions && this.jQ.mathquill.onKeyFunctions["Shift-Enter"]){
+            this.jQ.mathquill.onKeyFunctions["Shift-Enter"]();
+        }
+        //-** ends
+        break;
 
 
     // End -> move to the end of the current block.
