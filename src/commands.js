@@ -90,6 +90,20 @@ LatexCmds.overline = LatexCmds.bar = bind(Style, '\\overline', 'span', 'class="n
 // [Mozilla docs]: https://developer.mozilla.org/en-US/docs/CSS/color_value#Values
 // [W3C spec]: http://dev.w3.org/csswg/css3-color/#colorunits
 var TextColor = LatexCmds.textcolor = P(MathCommand, function(_, _super) {
+  //HACK fix this issue:
+  //Testacase:
+  //  Import: \textcolor{<color>}{x}
+  //  It now exports as: textcolor{x}
+  //  target: it should exports as : \textcolor{<color>}{x}
+  // -*- starts 
+  _.ctrlSeq = '\\textcolor';
+  _.latex = function() {
+    var color = this.color;
+    return this.foldChildren(this.ctrlSeq, function(latex, child) {
+      return latex + '{' + color + '}' + '{' + (child.latex() || ' ') + '}';
+    });
+  };
+  // -*- ends
   _.htmlTemplate = '<span class="mq-textcolor">&0</span>';
   _.jQadd = function() {
     _super.jQadd.apply(this, arguments);
@@ -261,7 +275,7 @@ CharCmds['/'] = P(Fraction, function(_, _super) {
           //separator of x and y) we need space works as a separator for fractions
           //original source is commented out as below.
           //',;:'.split('').indexOf(leftward.ctrlSeq) > -1
-          ["\\text{ }",";",":"].indexOf(leftward.ctrlSeq) > -1
+          ["\\:",";",":"].indexOf(leftward.ctrlSeq) > -1
           //*--HACK: use space as a separator for fractions instead of comma --*
         ) //lookbehind for operator
       )
@@ -888,16 +902,26 @@ P(MathCommand, function(_, _super) {
 });
 //HACK: add command for vector and hat
 //*-* end *-*
-
-//HACK: add command mathbb. This modification make mathquill support mathbb
-//  ex: mathbb{N} --> ℕ
-// because currently, MathQuill supports for \N,\Q,\Z,\R, so we will transfrom 'mathbb' to the 
-// existing form of \N,\Q,\Z,\R
+//HACK: this method transform a command to another command 
 //TODO: it's not a good fix. Rethink of it.
 //*-* start *-*
-var transformMathbb = function(latex) {
+var transform = function(latex) {
+  //HACK: add command mathbb. This modification make mathquill support mathbb
+  //  ex: mathbb{N} --> N
+  // because currently, MathQuill supports for \N,\Q,\Z,\R, so we will transfrom 'mathbb' to the 
+  // existing form of \N,\Q,\Z,\R
   if (latex.indexOf('mathbb') != -1) {
-    return latex.replace('mathbb','').replace(/[mathbb-{-}]/g,'');
+    latex = latex.replace(/mathbb{N}/g, 'N')
+                 .replace(/mathbb{Q}/g, 'Q')
+                 .replace(/mathbb{Z}/g, 'Z')
+                 .replace(/mathbb{R}/g, 'R');
+  }
+  //because '\' is a escape character, i haven't fonud better solution for importing spaces
+  //with associates latex '\:'.
+  //we need transform \: to a command named: '\kksp{}' so that we can import spaces with this.
+  //it's is too HACKY but it works fine utils i find better solution. 
+  if(latex.match(/\\:/)){
+    latex = latex.replace(/\\:/g,'\\kksp{}');
   }
   return latex;
 }

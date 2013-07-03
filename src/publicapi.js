@@ -29,7 +29,7 @@ jQuery.fn.mathquill = function(cmd, latex) {
       //HACK support mathbb. 
       //TODO: It may not a good fix. Rethink of this.
       //-*- start
-      latex = transformMathbb(latex);
+      latex = transform(latex);
       //-*- end
       return this.each(function() {
         var blockId = $(this).attr(mqBlockId),

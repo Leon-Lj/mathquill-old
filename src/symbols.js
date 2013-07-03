@@ -26,9 +26,9 @@ var VanillaSymbol = P(Symbol, function(_, _super) {
   };
 });
 //HACK support spaces
-//for hack: spaces will be exported as \text{ }
+//spaces will be imported and exported as '\:'
 //CharCmds[' '] = bind(VanillaSymbol, '\\:', ' ');
-CharCmds[' '] = bind(VanillaSymbol, '\\text{ }', ' ');
+LatexCmds['kksp'] = CharCmds[' '] = bind(VanillaSymbol, '\\:', ' ');
 //*-HACK support spaces-*
 LatexCmds.prime = CharCmds["'"] = bind(VanillaSymbol, "'", '&prime;');
 
