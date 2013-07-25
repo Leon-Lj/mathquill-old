@@ -876,29 +876,23 @@ LatexCmds.vector = P(MathCommand, function(_, _super) {
 });
 //HACK: add command for vector and hat
 //*-* start *-*
-var Hat =
-LatexCmds.hat =
-P(MathCommand, function(_, _super) {
-  _.ctrlSeq = '\\hat';
-  _.htmlTemplate =
-    '<sup class="diacritic-char">^</sup>'
-    + '<span class="">'
-    +   '&0'
-    + '</span>'
-  ;
-  _.textTemplate = ['(', '^', ')'];
-});
-var Vec =
-LatexCmds.vec =
-P(MathCommand, function(_, _super) {
+var Vec = LatexCmds.vec = P(MathCommand, function(_, _super) {
   _.ctrlSeq = '\\vec';
   _.htmlTemplate =
-    '<sup class="diacritic-char">&#8594;</sup>'
-    + '<span class="">'
-    +   '&0'
-    + '</span>'
-  ;
-  _.textTemplate = ['(', '^', ')'];
+      '<span class="non-leaf">'
+      +  '<span class="vector-prefix">&rarr;</span>'
+      +  '<span class="vector-stem">&0</span>'
+      +'</span>';
+  _.textTemplate = ['vec(', ')'];
+});
+var Hat = LatexCmds.hat = P(MathCommand, function(_, _super) {
+  _.ctrlSeq = '\\hat';
+  _.htmlTemplate =
+      '<span class="non-leaf">'
+      +  '<span class="hat-prefix">^</span>'
+      +  '<span class="hat-stem">&0</span>'
+      +'</span>';
+  _.textTemplate = ['hat(', ')'];
 });
 //HACK: add command for vector and hat
 //*-* end *-*
