@@ -69,22 +69,28 @@ jQuery.fn.mathquill = function(cmd, latex) {
           cursor = block && block.cursor;
 
         if (cursor) {
-          //HACK: No exponent/sub on empty cells
-          //Prevent using exponents and subtext on empty cells to prevent confusion.
-          //Only allow input exponents and subtext in case there is symbol had inputed before them.
-          //Also apply this hack in case input by pressing key.
-          if (latex === "^" || latex === "_") {
-            if (cursor[L] === 0) {
-                return;
-            }
-          }
-          //*-HACK: No exponent/sub on empty cells -*
           var seln = cursor.prepareWrite();
           if (/^\\[a-z]+$/i.test(latex)) cursor.insertCmd(latex.slice(1), seln);
           else cursor.insertCh(latex, seln);
           cursor.hide().parent.blur();
         }
       });
+  //HACK - provide method to select all math blocks--
+  //[Bug][Calculate tab] Step should remain in input editor
+  //https://redmine.orientsoftware.net/issues/9189
+  //add start
+  case 'selectAll':
+    return this.each(function() {
+      var blockId = $(this).attr(mqBlockId), block = blockId && MathElement[blockId], cursor = block && block.cursor;
+      if (cursor) {
+        if (block !== block.cursor.root)
+          return;
+        block.cursor.prepareMove().insAtRightEnd(block);
+        while (block.cursor[L])
+          block.cursor.selectLeft(); 
+      }
+    });  
+  //add end    
   default:
     var textbox = cmd === 'textbox',
       editable = textbox || cmd === 'editable',
