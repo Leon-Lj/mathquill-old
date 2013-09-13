@@ -274,7 +274,7 @@ LatexCmds['≤'] = LatexCmds.le = LatexCmds.leq = bind(BinaryOperator,'\\le ','&
 
 LatexCmds['≥'] = LatexCmds.ge = LatexCmds.geq = bind(BinaryOperator,'\\ge ','&ge;');
 
-LatexCmds['|'] = bind(BinaryOperator,'| ','| ');
+LatexCmds['|'] = bind(BinaryOperator,'|','|');
 
 LatexCmds.isin = LatexCmds['in'] = bind(BinaryOperator,'\\in ','&isin;');
 

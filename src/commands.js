@@ -472,7 +472,7 @@ CharCmds[']'] = bind(CloseParen, '[', ']');
 // 
   // _.createLeftOf = CloseBracket.prototype.createLeftOf;
 // });
-LatexCmds['|'] = bind(BinaryOperator,'| ','| ');
+//LatexCmds['|'] = bind(BinaryOperator,'| ','| ');
 //*-* HACK end
 var TextBlock =
 CharCmds.$ =
