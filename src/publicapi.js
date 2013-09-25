@@ -89,7 +89,28 @@ jQuery.fn.mathquill = function(cmd, latex) {
         while (block.cursor[L])
           block.cursor.selectLeft(); 
       }
-    });  
+    }); 
+  case 'clear':
+    return this.each(function() {
+      var blockId = $(this).attr(mqBlockId), rootBlock = blockId && MathElement[blockId];
+      if (rootBlock) {
+        rootBlock.cursor.backspace();
+      }
+  });
+  case 'showCursorAfter':
+    return this.each(function(){
+      var blockId = $(this).attr(mqBlockId),
+        block = blockId && MathElement[blockId],
+        cursor = block && block.cursor;
+        block.cursor.prepareMove().insAtLeftEnd(block);
+        while (cursor[R]){
+          cursor = cursor[R];
+          if (cursor.ctrlSeq == latex){
+            block.cursor.seek(cursor.jQ);
+            return;
+          }
+        }
+  });
   //add end    
   default:
     var textbox = cmd === 'textbox',

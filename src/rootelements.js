@@ -305,8 +305,14 @@ var RootMathBlock = P(MathBlock, function(_, _super) {
         }
         //-** ends
         break;
-
-
+    case 'Alt-Up':
+        //HACK hook on Shift-Up key press while typing on mathquill textbox
+        //-** start
+        if (this.jQ.mathquill.onKeyFunctions && this.jQ.mathquill.onKeyFunctions["Alt-Up"]){
+            this.jQ.mathquill.onKeyFunctions["Alt-Up"]();
+        }
+        //-** ends
+        break;
     // End -> move to the end of the current block.
     case 'End':
       this.cursor.prepareMove().insAtRightEnd(this.cursor.parent);
