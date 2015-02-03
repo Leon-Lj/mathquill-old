@@ -324,6 +324,16 @@ LatexCmds['√'] = P(MathCommand, function(_, _super) {
   };
 });
 
+var Vec = LatexCmds.vec = P(MathCommand, function(_, _super) {
+  _.ctrlSeq = '\\vec';
+  _.htmlTemplate =
+      '<span class="non-leaf">'
+    +   '<span class="vector-prefix">&rarr;</span>'
+    +   '<span class="vector-stem">&0</span>'
+    + '</span>'
+  ;
+  _.textTemplate = ['vec(', ')'];
+});
 
 var NthRoot =
 LatexCmds.nthroot = P(SquareRoot, function(_, _super) {
@@ -876,15 +886,6 @@ LatexCmds.vector = P(MathCommand, function(_, _super) {
 });
 //HACK: add command for vector and hat
 //*-* start *-*
-var Vec = LatexCmds.vec = P(MathCommand, function(_, _super) {
-  _.ctrlSeq = '\\vec';
-  _.htmlTemplate =
-      '<span class="non-leaf">'
-      +  '<span class="vector-prefix">&rarr;</span>'
-      +  '<span class="vector-stem">&0</span>'
-      +'</span>';
-  _.textTemplate = ['vec(', ')'];
-});
 var Hat = LatexCmds.hat = P(MathCommand, function(_, _super) {
   _.ctrlSeq = '\\hat';
   _.htmlTemplate =

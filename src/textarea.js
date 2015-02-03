@@ -128,7 +128,17 @@ var manageTextarea = (function() {
       clearTimeout(timeoutId);
 
       textarea.val(text);
-      if (text) textarea[0].select();
+      //fix#12247 [Bug][ipad][Calculate] $ sign appears on editor field
+      //start
+      //if (text) textarea[0].select();
+      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
+        if (text) {
+            textarea[0].setSelectionRange(0, 9999);
+        }
+      } else {
+        if (text) textarea[0].select();
+      }
+      //end
     }
 
     // -*- helper subroutines -*- //

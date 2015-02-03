@@ -13,7 +13,7 @@ JS environment could actually contain many instances. */
 var Cursor = P(Point, function(_) {
   _.init = function(root) {
     this.parent = this.root = root;
-    var jQ = this.jQ = this._jQ = $('<span class="cursor">&zwj;</span>');
+    var jQ = this.jQ = this._jQ = $('<span class="cursor">&#8203;</span>');
 
     //closured for setInterval
     this.blink = function(){ jQ.toggleClass('blink'); };
@@ -142,13 +142,14 @@ var Cursor = P(Point, function(_) {
    *   Given undefined, will bubble up to the next ancestor block.
    *   Given false, will stop bubbling.
    *   Given a MathBlock,
-   *     + moveUp will insAtRightEnd of it
-   *     + moveDown will insAtLeftEnd of it
-   *
+   *     + if there is a cached Point in the block, insert there
+   *     + else, seekHoriz within the block to the current x-coordinate (to be
+   *       as close to directly above/below the current position as possible)
    */
   _.moveUp = function() { return moveUpDown(this, 'up'); };
   _.moveDown = function() { return moveUpDown(this, 'down'); };
   function moveUpDown(self, dir) {
+    self.clearSelection().show();
     if (self[R][dir]) self.insAtLeftEnd(self[R][dir]);
     else if (self[L][dir]) self.insAtRightEnd(self[L][dir]);
     else {
@@ -181,8 +182,7 @@ var Cursor = P(Point, function(_) {
         ancestorBlock = ancestorBlock.parent.parent;
       } while (ancestorBlock);
     }
-
-    return self.clearSelection().show();
+    return self;
   }
 
   _.seek = function(target, pageX, pageY) {

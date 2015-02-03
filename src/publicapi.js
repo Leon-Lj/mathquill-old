@@ -90,6 +90,11 @@ jQuery.fn.mathquill = function(cmd, latex) {
           block.cursor.selectLeft(); 
       }
     }); 
+  case 'backspace':
+    return this.each(function() {
+      var blockId = $(this).attr(mqBlockId), block = blockId && MathElement[blockId];
+      block.cursor.backspace(); 
+    });
   case 'clear':
     return this.each(function() {
       var blockId = $(this).attr(mqBlockId), rootBlock = blockId && MathElement[blockId];
@@ -102,6 +107,13 @@ jQuery.fn.mathquill = function(cmd, latex) {
       var blockId = $(this).attr(mqBlockId),
         block = blockId && MathElement[blockId],
         cursor = block && block.cursor;
+        if (latex == "end"){
+          block.cursor.prepareMove().insAtRightEnd(block);
+          return;
+        } else if (latex == "start"){
+          block.cursor.prepareMove().insAtLeftEnd(block);
+          return;
+        }
         block.cursor.prepareMove().insAtLeftEnd(block);
         while (cursor[R]){
           cursor = cursor[R];
@@ -111,6 +123,37 @@ jQuery.fn.mathquill = function(cmd, latex) {
           }
         }
   });
+  // for purpose: do something after a key is pressed
+  case 'setOnKeyDownFn' :
+    this.each(function() {
+      var blockId = $(this).attr(mqBlockId), block = blockId && MathElement[blockId];
+      block.onKeyDownFns = latex;
+    }); 
+    return ;
+  //add end 
+  // for purpose: do something after the inputed text changes
+  case 'setOnTextCallBackFns' :
+    this.each(function() {
+      var blockId = $(this).attr(mqBlockId), block = blockId && MathElement[blockId];
+      block.onTextCallBackFns = latex;
+    }); 
+    return ;
+  //add end 
+  case 'multilanguage':
+    switch(latex){
+      case 'cdot':
+        CharCmds['*'] = LatexCmds.sdot = LatexCmds.cdot = bind(BinaryOperator, '\\cdot ', '&middot;');
+        LatexCmds[':'] = LatexCmds['÷'] = LatexCmds.div = LatexCmds.divide = LatexCmds.divides = bind(BinaryOperator, ':', ':', '[/]');
+        break;
+      default :
+        CharCmds['*'] = LatexCmds.times = bind(BinaryOperator, '\\times ', '&times;', '[x]');
+        LatexCmds[':'] = LatexCmds['÷'] = LatexCmds.div = LatexCmds.divide = LatexCmds.divides = bind(BinaryOperator, '\\div ', '&divide;', '[/]');
+    }
+    break;
+  case 'getCursor':
+    var blockId = $(this).attr(mqBlockId), block = blockId && MathElement[blockId];
+    var times = latex;
+    return block.cursor;
   //add end    
   default:
     var textbox = cmd === 'textbox',

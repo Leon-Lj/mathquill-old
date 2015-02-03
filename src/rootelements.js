@@ -1,7 +1,247 @@
 /*********************************************
  * Root math elements with event delegation.
  ********************************************/
+function bindEventForSelectWordForDesktop(jQ, root, textbox, editable, cursor, textarea){
+    //drag-to-select event handling
+  var anticursor, blink = cursor.blink, selectAllTimeOut;
+  //HACK - Selecting text in input editor PC 
+  //https://redmine.orientsoftware.net/issues/13376
+  //Start
+  jQ.bind('dblclick.mathquill', function(e) {
+    anticursor = Point(cursor.parent, cursor[L], cursor[R]);
+    cursor.moveRight();
+    selectAllTimeOut = true;
+    if (cursor[L] !== anticursor[L]
+        || cursor.parent !== anticursor.parent) {
+      cursor.selectFrom(anticursor);
+    }
+    setTimeout(function(){
+      selectAllTimeOut = false;
+    },300);
+    e.preventDefault();
+    return false;
+  });
+  //HACK - Selecting text in input editor PC 
+  //https://redmine.orientsoftware.net/issues/13376
+  //End
+  jQ.bind('mousedown.mathquill', function(e) {
+    //HACK - Selecting text in input editor PC 
+    //https://redmine.orientsoftware.net/issues/13376
+    //Start
+    if (cursor.selection && selectAllTimeOut){
+      cursor.prepareMove().insAtLeftEnd(root);
+      anticursor = Point(cursor.parent, cursor[L], cursor[R]);
+      cursor.selectFrom(anticursor);
+      anticursor = undefined;
+      return false;
+    }
+    //HACK - Selecting text in input editor PC 
+    //https://redmine.orientsoftware.net/issues/13376
+  //End;
+    function mousemove(e) {
+      cursor.seek($(e.target), e.pageX, e.pageY);
 
+      if (cursor[L] !== anticursor[L]
+          || cursor.parent !== anticursor.parent) {
+        cursor.selectFrom(anticursor);
+      }
+
+      return false;
+    }
+
+    // docmousemove is attached to the document, so that
+    // selection still works when the mouse leaves the window.
+    function docmousemove(e) {
+      // [Han]: i delete the target because of the way seek works.
+      // it will not move the mouse to the target, but will instead
+      // just seek those X and Y coordinates.  If there is a target,
+      // it will try to move the cursor to document, which will not work.
+      // cursor.seek needs to be refactored.
+      delete e.target;
+
+      return mousemove(e);
+    }
+
+    function mouseup(e) {
+      anticursor = undefined;
+      cursor.blink = blink;
+      if (!cursor.selection) {
+        if (editable) {
+          cursor.show();
+        }
+        else {
+          textareaSpan.detach();
+        }
+      }
+
+      // delete the mouse handlers now that we're not dragging anymore
+      jQ.unbind('mousemove', mousemove);
+      $(e.target.ownerDocument).unbind('mousemove', docmousemove).unbind('mouseup', mouseup);
+    }
+
+    setTimeout(function() { textarea.focus(); textarea.focused = true; });
+      // preventDefault won't prevent focus on mousedown in IE<9
+      // that means immediately after this mousedown, whatever was
+      // mousedown-ed will receive focus
+      // http://bugs.jquery.com/ticket/10345
+
+    cursor.blink = noop;
+    cursor.seek($(e.target), e.pageX, e.pageY);
+
+    anticursor = Point(cursor.parent, cursor[L], cursor[R]);
+
+    if (!editable && !textarea.focused) jQ.prepend(textareaSpan);
+
+    jQ.mousemove(mousemove);
+    $(e.target.ownerDocument).mousemove(docmousemove).mouseup(mouseup);
+
+    return false;
+  });
+}
+function bindEventForSelectWordForHandheld(jQ, root, textbox, editable, cursor, textarea) {
+    var anticursor, blink = cursor.blink;
+    //Bug #13954: [Bug][Window phone][Calculate] Virtual keyboard doesn't work
+    //https://redmine.orientsoftware.net/issues/13954
+    //HACK 13954 --start
+    if (window.navigator.msPointerEnabled) {
+        jQ.bind('mousedown.mathquill', function(e) {
+            function mousemove(e) {
+                var pageX = e.pageX;
+                var scrollH = jQuery(document).scrollTop();
+                var pageY = e.pageY - scrollH;
+                var ele = document.elementFromPoint(pageX, pageY);
+                e.target = ele;
+                cursor.seek($(e.target), pageX, pageY);
+                if (cursor[L] !== anticursor[L] || cursor.parent !== anticursor.parent) {
+                    cursor.selectFrom(anticursor);
+                }
+                return false;
+            }
+
+            // docmousemove is attached to the document, so that
+            // selection still works when the mouse leaves the window.
+            function docmousemove(e) {
+                // [Han]: i delete the target because of the way seek works.
+                // it will not move the mouse to the target, but will instead
+                // just seek those X and Y coordinates.  If there is a target,
+                // it will try to move the cursor to document, which will not work.
+                // cursor.seek needs to be refactored.
+                delete e.target;
+
+                return mousemove(e);
+            }
+
+            function mouseup(e) {
+                anticursor = undefined;
+                cursor.blink = blink;
+                if (!cursor.selection) {
+                    if (editable) {
+                        cursor.show();
+                    } else {
+                        textareaSpan.detach();
+                    }
+                }
+                // delete the mouse handlers now that we're not dragging anymore
+                jQ.unbind('mousemove', mousemove);
+                $(e.target.ownerDocument).unbind('mousemove', docmousemove).unbind('mouseup', mouseup);
+            }
+
+            //setTimeout(function() { if (document.activeElement != textarea[0]) {textarea.focus();}  });
+            textarea.focus();
+            // preventDefault won't prevent focus on mousedown in IE<9
+            // that means immediately after this mousedown, whatever was
+            // mousedown-ed will receive focus
+            // http://bugs.jquery.com/ticket/10345
+
+            cursor.blink = noop;
+            // cursor.seek($(e.target), e.pageX, e.pageY);
+            cursor.seek($(e.target), e.pageX, e.pageX);
+
+            anticursor = Point(cursor.parent, cursor[L], cursor[R]);
+
+            if (!editable)
+                jQ.prepend(textareaSpan);
+
+            jQ.bind("mousemove", mousemove);
+            $(e.target.ownerDocument).bind('mousemove', docmousemove).bind('mouseup', mouseup);
+
+            return false;
+        });
+
+        //HACK 13954 --end  
+    } else {
+        jQ.bind('touchstart.mathquill', function(e) {
+            function mousemove(e) {
+                var pageX = e.originalEvent.touches[0].pageX;
+                var scrollH = jQuery(document).scrollTop();
+                var pageY = e.originalEvent.touches[0].pageY - scrollH;
+                var ele = document.elementFromPoint(pageX, pageY);
+                e.target = ele;
+                cursor.seek($(e.target), pageX, pageY);
+                if (cursor[L] !== anticursor[L] || cursor.parent !== anticursor.parent) {
+                    cursor.selectFrom(anticursor);
+                }
+                return false;
+            }
+
+            // docmousemove is attached to the document, so that
+            // selection still works when the mouse leaves the window.
+            function docmousemove(e) {
+                // [Han]: i delete the target because of the way seek works.
+                // it will not move the mouse to the target, but will instead
+                // just seek those X and Y coordinates.  If there is a target,
+                // it will try to move the cursor to document, which will not work.
+                // cursor.seek needs to be refactored.
+                delete e.target;
+
+                return mousemove(e);
+            }
+
+            function mouseup(e) {
+                anticursor = undefined;
+                cursor.blink = blink;
+                if (!cursor.selection) {
+                    if (editable) {
+                        cursor.show();
+                    } else {
+                        textareaSpan.detach();
+                    }
+                }
+                // delete the mouse handlers now that we're not dragging anymore
+                jQ.unbind('touchmove', mousemove);
+                $(e.target.ownerDocument).unbind('touchmove', docmousemove).unbind('touchend', mouseup);
+            }
+
+            //setTimeout(function() { if (document.activeElement != textarea[0]) {textarea.focus();}  });
+            textarea.focus();
+            // preventDefault won't prevent focus on mousedown in IE<9
+            // that means immediately after this mousedown, whatever was
+            // mousedown-ed will receive focus
+            // http://bugs.jquery.com/ticket/10345
+
+            cursor.blink = noop;
+            // cursor.seek($(e.target), e.pageX, e.pageY);
+            cursor.seek($(e.target), e.originalEvent.touches[0].pageX, e.originalEvent.touches[0].pageX);
+
+            anticursor = Point(cursor.parent, cursor[L], cursor[R]);
+
+            if (!editable)
+                jQ.prepend(textareaSpan);
+
+            jQ.bind("touchmove", mousemove);
+            $(e.target.ownerDocument).bind('touchmove', docmousemove).bind('touchend', mouseup);
+
+            return false;
+        });
+    }
+}
+function bindEventForSelectWord(jQ, root, textbox, editable, cursor, textarea){
+  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
+    bindEventForSelectWordForHandheld(jQ, root, textbox, editable, cursor, textarea);
+  } else {
+    bindEventForSelectWordForDesktop(jQ, root, textbox, editable, cursor, textarea);
+  }
+}
 function createRoot(jQ, root, textbox, editable) {
   var contents = jQ.contents().detach();
 
@@ -47,68 +287,14 @@ function createRoot(jQ, root, textbox, editable) {
   });
 
   //drag-to-select event handling
-  var anticursor, blink = cursor.blink;
-  jQ.bind('mousedown.mathquill', function(e) {
-    function mousemove(e) {
-      cursor.seek($(e.target), e.pageX, e.pageY);
-
-      if (cursor[L] !== anticursor[L]
-          || cursor.parent !== anticursor.parent) {
-        cursor.selectFrom(anticursor);
-      }
-
-      return false;
-    }
-
-    // docmousemove is attached to the document, so that
-    // selection still works when the mouse leaves the window.
-    function docmousemove(e) {
-      // [Han]: i delete the target because of the way seek works.
-      // it will not move the mouse to the target, but will instead
-      // just seek those X and Y coordinates.  If there is a target,
-      // it will try to move the cursor to document, which will not work.
-      // cursor.seek needs to be refactored.
-      delete e.target;
-
-      return mousemove(e);
-    }
-
-    function mouseup(e) {
-      anticursor = undefined;
-      cursor.blink = blink;
-      if (!cursor.selection) {
-        if (editable) {
-          cursor.show();
-        }
-        else {
-          textareaSpan.detach();
-        }
-      }
-
-      // delete the mouse handlers now that we're not dragging anymore
-      jQ.unbind('mousemove', mousemove);
-      $(e.target.ownerDocument).unbind('mousemove', docmousemove).unbind('mouseup', mouseup);
-    }
-
-    setTimeout(function() { textarea.focus(); });
-      // preventDefault won't prevent focus on mousedown in IE<9
-      // that means immediately after this mousedown, whatever was
-      // mousedown-ed will receive focus
-      // http://bugs.jquery.com/ticket/10345
-
-    cursor.blink = noop;
-    cursor.seek($(e.target), e.pageX, e.pageY);
-
-    anticursor = Point(cursor.parent, cursor[L], cursor[R]);
-
-    if (!editable) jQ.prepend(textareaSpan);
-
-    jQ.mousemove(mousemove);
-    $(e.target.ownerDocument).mousemove(docmousemove).mouseup(mouseup);
-
-    return false;
-  });
-
+  var anticursor, blink = cursor.blink, selectAllTimeOut;
+  //HACK - Selecting text in input editor PC 
+  //https://redmine.orientsoftware.net/issues/13376
+  //Start
+  bindEventForSelectWord(jQ, root, textbox, editable, cursor, textarea);
+  //HACK - Selecting text in input editor PC 
+  //https://redmine.orientsoftware.net/issues/13376
+  //End
   if (!editable) {
     var textareaManager = manageTextarea(textarea, { container: jQ });
     jQ.bind('cut paste', false).bind('copy', setTextareaSelection)
@@ -119,6 +305,7 @@ function createRoot(jQ, root, textbox, editable) {
     });
     function detach() {
       textareaSpan.detach();
+      textarea.focused = false;
     }
     return;
   }
@@ -181,10 +368,20 @@ function createRoot(jQ, root, textbox, editable) {
       cursor.selection.jQ.addClass('blur');
     e.stopPropagation();
   });
+  //hack start
+  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
+    jQ.bind('focus.mathquill blur.mathquill', function(e) {
+      textarea.trigger(e);
+    }).bind('click.mathquill', function(e) {
+      if (document.activeElement != textarea[0]) {textarea.focus();}    
+    }).blur();
+  } else {
+    jQ.bind('focus.mathquill blur.mathquill', function(e) {
+      textarea.trigger(e);
+    }).blur();
+  }
+  //hack end
 
-  jQ.bind('focus.mathquill blur.mathquill', function(e) {
-    textarea.trigger(e);
-  }).blur();
 }
 
 var RootMathBlock = P(MathBlock, function(_, _super) {
@@ -413,11 +610,17 @@ var RootMathBlock = P(MathBlock, function(_, _super) {
     default:
       return false;
     }
+    if (this.onKeyDownFns && this.onKeyDownFns[key]) {
+      this.onKeyDownFns[key](this);
+    }
     e.preventDefault();
     return false;
   };
   _.onText = function(ch) {
     this.cursor.write(ch);
+    if (this.onTextCallBackFns) {
+      this.onTextCallBackFns(this);
+    }
     return false;
   };
 });

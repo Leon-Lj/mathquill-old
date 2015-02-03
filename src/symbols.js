@@ -22,6 +22,12 @@ var Variable = P(Symbol, function(_, _super) {
 
 var VanillaSymbol = P(Symbol, function(_, _super) {
   _.init = function(ch, html) {
+    //FIX: #13505 [Bug][Calculate] Drag function doesn't work
+    //https://redmine.orientsoftware.net/issues/13505
+    //-- Start
+    if (ch === '>') html = '&gt;';
+    if (ch === '<') html = '&lt;';
+    //-- End
     _super.init.call(this, ch, '<span>'+(html || ch)+'</span>');
   };
 });
