@@ -156,6 +156,13 @@ var manageTextarea = (function() {
     function popText(callback) {
       var text = textarea.val();
       textarea.val('');
+      //-*- HACK: fix#17026: Extra ^ on Chrome MAC with Scandinavian keyboard layout
+      // start
+      var arrChars = text.split('');
+      if(arrChars.length > 1 && callback === textCallback){
+        text = arrChars[1];
+      }
+      //end
       if (text) callback(text);
     }
 
